@@ -89,7 +89,6 @@ class Ball():
 
     def SpaceKeyPressed(self):
         global  Angle 
-        
         #it's planned that the power of hit and the angle will be detected under this function. 
         # To do 
         BallPower = 0.1/Angle
@@ -156,7 +155,7 @@ def CalculationMotionVector(mouse):
     global PowerWithString
     x_speed = ball.x_pos - mouse[0] 
     y_speed = ball.y_pos - mouse[1]
-
+    
     '''
     if PowerWithString == 'Slow 0':
         x_speed, y_speed = 8,8
@@ -204,16 +203,17 @@ while run:
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             run = False
-        if event.type == pygame.KEYDOWN:
+        
+        if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
                     ball.SpacePressed = True
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_ESCAPE:
-                print(ball.SpaceKeyPressed())
+                    print(ball.SpaceKeyPressed())
 
-    if keys[pygame.K_ESCAPE]:
-        UpdateBarAngle()
+    if keys[pygame.K_SPACE]:
+        if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
+            UpdateBarAngle()
+
         
         
     pygame.display.flip()
