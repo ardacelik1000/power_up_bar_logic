@@ -88,19 +88,21 @@ class Ball():
                 pygame.draw.line(Screen,'white',(self.x_pos,self.y_pos),(mouse[0],mouse[1]),BallDirectionThickness)
 
     def SpaceKeyPressed(self):
+        global  Angle 
+        
         #it's planned that the power of hit and the angle will be detected under this function. 
         # To do 
         BallPower = 0.1/Angle
         PowerWithString = None
-
+        
         if(BallPower< 0.03446383139834663):
             PowerWithString = 'Slow 0'
         if(0.03446383139834663<BallPower<=0.036878695576790556):
             PowerWithString = 'Slow 1'
         if(0.036878695576790556<BallPower<=0.041813140649139734):
-            PowerWithString = 'Slow 3'
+            PowerWithString = 'Slow 2'
         if(0.041813140649139734<BallPower<=0.05021107093348202):
-            PowerWithString = 'Slow 4'
+            PowerWithString = 'Slow 3'
         if(0.05021107093348202<BallPower<=0.0703436386981033):
             PowerWithString = 'Medium 0'
         if(0.0703436386981033<BallPower<=0.10850780939982202):
@@ -110,6 +112,7 @@ class Ball():
         if(0.2076443634565331<BallPower<=0.5219406805340868):
             PowerWithString = 'Max 1'
         
+        Angle = math.pi
         return PowerWithString
 
     def UpdatePos(self): 
@@ -147,11 +150,31 @@ def UpdateBarAngle():
         BarSpeed *= -1
     if Angle == 3.141592653589793: 
         BarSpeed *= -1
+    return Angle
 
 def CalculationMotionVector(mouse):
+    global PowerWithString
     x_speed = ball.x_pos - mouse[0] 
     y_speed = ball.y_pos - mouse[1]
 
+    '''
+    if PowerWithString == 'Slow 0':
+        x_speed, y_speed = 8,8
+    if PowerWithString == 'Slow 1':
+        x_speed, y_speed = 19,19
+    if PowerWithString == 'Slow 2':
+        x_speed, y_speed = 30,30
+    if PowerWithString == 'Slow 3':
+        x_speed, y_speed = 42,42
+    if PowerWithString == 'Medium 0':
+        x_speed, y_speed = 62,62
+    if PowerWithString == 'Medium 1':
+        x_speed, y_speed = 72,72
+    if PowerWithString == 'Max 0':
+        x_speed, y_speed = 82,82
+    if PowerWithString == 'Max 1':
+        x_speed, y_speed = 91,91
+    '''
     return x_speed, y_speed
 
 
@@ -160,15 +183,13 @@ ball = Ball(Width/3,Height/3,25,'purple',100,.7,0,0,0.02)
 while run:
     Timer.tick(fps)
     Screen.fill('black')
-
+    keys = pygame.key.get_pressed()
     #For the power bar
-    UpdateBarAngle()
     PowerUpBar()
 
     #Getting the position of the mouse 
     MouseCoord = pygame.mouse.get_pos()
-    
-    
+
     x_push, y_push = CalculationMotionVector(MouseCoord)
     
     #Drawing the ball, updating the position if the ball, calling 'gravity check' method from the Ball class, and drawing the arrow appears when the mouse is close to the ball
@@ -176,6 +197,10 @@ while run:
     ball.UpdatePos()
     ball.y_speed = ball.GravityCheck()
     ball.BallArrow(MouseCoord)
+
+    #x = ball.SpaceKeyPressed()
+    #print(f'The power is: {x}')
+
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             run = False
@@ -183,7 +208,14 @@ while run:
             if event.key == pygame.K_SPACE:
                 if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
                     ball.SpacePressed = True
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_ESCAPE:
+                print(ball.SpaceKeyPressed())
 
+    if keys[pygame.K_ESCAPE]:
+        UpdateBarAngle()
+        
+        
     pygame.display.flip()
 
 pygame.quit()
