@@ -20,7 +20,7 @@ WallThickness = 10
 
 
 #For The Bar
-BarSpeed = -0.01 
+BarSpeed = 0.01 
 Angle = math.pi
 cx, cy =  100, 100
 radius = 100  #yaricap
@@ -29,7 +29,6 @@ start_angle = 0
 #For Gravity Check
 Gravity = 0.5
 BounceStop = 0.3 
-
 
 class Ball():
     #ball = Ball(Width/3,Height/3,40,'red',100,.7,0,0,0.02)
@@ -43,22 +42,38 @@ class Ball():
         self.y_speed = y_speed
         self.x_speed = x_speed
         self.friction = friction
+        self.SpacePressed = False
 
     def draw(self):
         self.circle = pygame.draw.circle(Screen,self.color,(self.x_pos,self.y_pos),self.radius)
     
     def GravityCheck(self):
-        if self.y_pos < Height - self.radius - (WallThickness / 2):
+        if not self.SpacePressed: 
+            if self.y_pos < Height - self.radius - (WallThickness/2):
                 self.y_speed += Gravity
-        else:
-                # If the speed of the ball is higher than certain amount of value, it's 0.3 for 'BounceStop', the ball goes to the opposite side when it touches to the surface.
-            if self.y_speed > BounceStop:
-                    self.y_speed = self.y_speed * -1 * self.retention
-            # if the absolute of the value of speed is less than 0.3, it stops.
-            else:
-                if abs(self.y_speed) <= BounceStop:
-                    self.y_speed = 0
-        
+            else: 
+                # when it's really close to the surface
+                # if my total speed is less than 0.3, I'm just gonna stop. 
+                if self.y_speed > BounceStop: 
+                    self.y_speed = self.y_speed * -1 * self.retention # retention values needs to be among 0 and 1 
+                elif abs(self.y_speed) <= BounceStop: 
+                    self.y_speed = 0 
+            if (self.x_pos < self.radius + (WallThickness/2) and self.x_speed < 0) or (self.x_pos > Width - self.radius - (WallThickness/2) and self.x_speed > 0): 
+                #the condition above cause the ball to bounce
+                self.x_speed *= -1 * self.retention
+                if abs(self.x_speed) <= BounceStop:
+                    self.x_speed = 0 
+            # For the fraction on surface
+            if self.y_speed == 0 and self.x_speed != 0: 
+                if self.x_speed > 0: 
+                    self.x_speed -= self.friction
+                elif self.x_speed < 0: 
+                    self.x_speed += self.friction
+                    
+        if self.SpacePressed: 
+            self.SpacePressed = False  
+            self.x_speed -= x_push
+            self.y_speed -= y_push   
         return self.y_speed
     
     def UpdatePos(self): 
@@ -69,7 +84,7 @@ class Ball():
     def BallArrow(self,mouse): 
         #When you bring the mouse closer to the ball, it appears.
         if (self.x_pos-100 < mouse[0] <self.x_pos +100) and (self.y_pos-100 < mouse[1]):
-            if (self.y_speed == 0 and self.x_speed == 0):
+            if (self.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795) ):
                 pygame.draw.line(Screen,'white',(self.x_pos,self.y_pos),(mouse[0],mouse[1]),BallDirectionThickness)
 
     def SpaceKeyPressed(self):
@@ -77,7 +92,6 @@ class Ball():
         # To do 
         BallPower = 0.1/Angle
         PowerWithString = None
-        
 
         if(BallPower< 0.03446383139834663):
             PowerWithString = 'Slow 0'
@@ -98,6 +112,10 @@ class Ball():
         
         return PowerWithString
 
+    def UpdatePos(self): 
+        self.y_pos += self.y_speed
+        self.x_pos += self.x_speed
+    
 
 def PowerUpBar():
     end_angle = math.pi
@@ -124,11 +142,18 @@ def UpdateBarAngle():
     # Bar Angle is going to be the most important one to be able to detect the power of the ball in the game. 
     global Angle
     global BarSpeed
-    Angle += BarSpeed
+    Angle -= BarSpeed
     if Angle<=0:
         BarSpeed *= -1
     if Angle == 3.141592653589793: 
         BarSpeed *= -1
+
+def CalculationMotionVector(mouse):
+    x_speed = ball.x_pos - mouse[0] 
+    y_speed = ball.y_pos - mouse[1]
+
+    return x_speed, y_speed
+
 
 ball = Ball(Width/3,Height/3,25,'purple',100,.7,0,0,0.02)
 
@@ -142,15 +167,22 @@ while run:
 
     #Getting the position of the mouse 
     MouseCoord = pygame.mouse.get_pos()
+    
+    
+    x_push, y_push = CalculationMotionVector(MouseCoord)
+    
     #Drawing the ball, updating the position if the ball, calling 'gravity check' method from the Ball class, and drawing the arrow appears when the mouse is close to the ball
     ball.draw()
     ball.UpdatePos()
     ball.y_speed = ball.GravityCheck()
-    ball.BallArrow(MouseCoord) 
-
+    ball.BallArrow(MouseCoord)
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             run = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
+                    ball.SpacePressed = True
 
     pygame.display.flip()
 
