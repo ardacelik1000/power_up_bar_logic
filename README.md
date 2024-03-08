@@ -54,3 +54,5 @@ Contributions:
 
 ![forGitHub](https://github.com/ardacelik1000/power_up_bar_logic/assets/119524888/9dca66a4-6f73-4f08-bbc3-5f3a1d546fb2)
 
+Youtube Video Link =  https://www.youtube.com/watch?v=pdV5s1RcesE&t=2s
+
