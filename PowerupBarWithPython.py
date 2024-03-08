@@ -20,7 +20,7 @@ WallThickness = 10
 
 
 #For The Bar
-BarSpeed = 0.01 
+BarSpeed = 0.015
 Angle = math.pi
 cx, cy =  100, 100
 radius = 100  #yaricap
@@ -72,8 +72,8 @@ class Ball():
                     
         if self.SpacePressed: 
             self.SpacePressed = False  
-            self.x_speed -= x_push
-            self.y_speed -= y_push   
+            self.x_speed = x_push
+            self.y_speed = y_push   
         return self.y_speed
     
     def UpdatePos(self): 
@@ -89,40 +89,36 @@ class Ball():
 
     def SpaceKeyPressed(self):
         global  Angle 
+        global Power
         #it's planned that the power of hit and the angle will be detected under this function. 
         # To do 
         BallPower = 0.1/Angle
-        PowerWithString = None
         
         if(BallPower< 0.03446383139834663):
-            PowerWithString = 'Slow 0'
+            Power = 1 
         if(0.03446383139834663<BallPower<=0.036878695576790556):
-            PowerWithString = 'Slow 1'
+            Power = 4
         if(0.036878695576790556<BallPower<=0.041813140649139734):
-            PowerWithString = 'Slow 2'
+            Power = 7
         if(0.041813140649139734<BallPower<=0.05021107093348202):
-            PowerWithString = 'Slow 3'
+            Power = 12
         if(0.05021107093348202<BallPower<=0.0703436386981033):
-            PowerWithString = 'Medium 0'
+            Power = 16
         if(0.0703436386981033<BallPower<=0.10850780939982202):
-            PowerWithString = 'Medium 1'
+            Power = 21
         if(0.10850780939982202<BallPower<=0.2076443634565331):
-            PowerWithString = 'Max 0'
+            Power = 27
         if(0.2076443634565331<BallPower<=0.5219406805340868):
-            PowerWithString = 'Max 1'
+            Power = 35
         
         Angle = math.pi
-        return PowerWithString
-
-    def UpdatePos(self): 
-        self.y_pos += self.y_speed
-        self.x_pos += self.x_speed
+        return Power 
     
 
 def PowerUpBar():
     end_angle = math.pi
     #radius and angle is equal to at the beginning 100 
-
+    
     x = cx + radius * math.cos(Angle)
     y = cy - radius * math.sin(Angle)
     
@@ -151,47 +147,25 @@ def UpdateBarAngle():
         BarSpeed *= -1
     return Angle
 
-def CalculationMotionVector(mouse):
-    global PowerWithString
+def CalculationMotionVector(mouse, Power):
     x_speed = None
     y_speed = None
+    dx = mouse[0] - ball.x_pos
+    dy = mouse[1] - ball.y_pos
+
+    angle = math.atan2(dy, dx)
+
     if (ball.x_pos-100 < mouse[0] <ball.x_pos +100) and (ball.y_pos-100 < mouse[1]):
-        x_speed = (ball.x_pos - mouse[0])
-        if abs(x_speed) == x_speed: 
-            x_speed = 1
-        else: 
-            x_speed = -1 
-        y_speed = ball.y_pos - mouse[1]
-        if abs(y_speed) == y_speed:
-            y_speed = 1 
-        else: 
-            y_speed = -1 
+        if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795) ):
+            x_speed = Power * math.cos(angle)
+            y_speed = Power * math.sin(angle)
 
-    elif x_speed is None and y_speed is None:
+    if x_speed is None or y_speed is None:
         x_speed = 0
-        y_speed = 0
-
-    print(f'X speed = {y_speed}, ball x position = {ball.y_pos}, mouse position = {mouse[1]}')
-    # yon ayrimi yapabiliyor sadece magnitude gireceksin....
-    ''' 
-    if PowerWithString == 'Slow 0':
-        x_speed, y_speed = 8,8
-    if PowerWithString == 'Slow 1':
-        x_speed, y_speed = 19,19
-    if PowerWithString == 'Slow 2':
-        x_speed, y_speed = 30,30
-    if PowerWithString == 'Slow 3':
-        x_speed, y_speed = 42,42
-    if PowerWithString == 'Medium 0':
-        x_speed, y_speed = 62,62
-    if PowerWithString == 'Medium 1':
-        x_speed, y_speed = 72,72
-    if PowerWithString == 'Max 0':
-        x_speed, y_speed = 82,82
-    if PowerWithString == 'Max 1':
-        x_speed, y_speed = 91,91
-    '''
+        y_speed = 0    
+    
     return x_speed, y_speed
+
 
 
 ball = Ball(Width/3,Height/3,25,'purple',100,.7,0,0,0.02)
@@ -206,7 +180,6 @@ while run:
     #Getting the position of the mouse 
     MouseCoord = pygame.mouse.get_pos()
 
-    x_push, y_push = CalculationMotionVector(MouseCoord)
     
     #Drawing the ball, updating the position if the ball, calling 'gravity check' method from the Ball class, and drawing the arrow appears when the mouse is close to the ball
     ball.draw()
@@ -225,7 +198,9 @@ while run:
             if event.key == pygame.K_SPACE:
                 if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
                     ball.SpacePressed = True
-                    print(ball.SpaceKeyPressed())
+                    Power = ball.SpaceKeyPressed()
+                    x_push, y_push = CalculationMotionVector(MouseCoord,Power)
+
 
     if keys[pygame.K_SPACE]:
         if (ball.y_speed == 0 and (-0.01346666666673205<= ball.x_speed <= 0.00653333333326795)):
