@@ -153,10 +153,27 @@ def UpdateBarAngle():
 
 def CalculationMotionVector(mouse):
     global PowerWithString
-    x_speed = ball.x_pos - mouse[0] 
-    y_speed = ball.y_pos - mouse[1]
-    
-    '''
+    x_speed = None
+    y_speed = None
+    if (ball.x_pos-100 < mouse[0] <ball.x_pos +100) and (ball.y_pos-100 < mouse[1]):
+        x_speed = (ball.x_pos - mouse[0])
+        if abs(x_speed) == x_speed: 
+            x_speed = 1
+        else: 
+            x_speed = -1 
+        y_speed = ball.y_pos - mouse[1]
+        if abs(y_speed) == y_speed:
+            y_speed = 1 
+        else: 
+            y_speed = -1 
+
+    elif x_speed is None and y_speed is None:
+        x_speed = 0
+        y_speed = 0
+
+    print(f'X speed = {y_speed}, ball x position = {ball.y_pos}, mouse position = {mouse[1]}')
+    # yon ayrimi yapabiliyor sadece magnitude gireceksin....
+    ''' 
     if PowerWithString == 'Slow 0':
         x_speed, y_speed = 8,8
     if PowerWithString == 'Slow 1':
